@@ -19,16 +19,14 @@ Participar do AI Skills Challenge e concluir com excelência os módulos propost
 | ✅ [Planejar e preparar-se para desenvolver soluções de IA no Azure](/docs/module/01-planning-azure-ai-solutions.md.md) | 1h | Concluído |
 | ✅ [Explore e implante modelos do catálogo de modelos no portal do Azure AI Foundry](/docs/module/02-explore-and-deploy-models-azure-ai-foundry.md) | 40 min | Concluído |
 | ✅ [Desenvolver um aplicativo de IA com o SDK do Azure AI Foundry](/docs/module/03-develop-ai-app-azure-ai-foundry.md) | 55 min | Concluído |
-
-
+| ✅ [Conceitos básicos dos agentes de IA no Azure](/docs/module/06-basic-ai-agents-azure.md) | 49 min | Concluído |
+| ✅ [Criar uma solução de copiloto baseada em RAG com seus próprios dados usando o Azure AI Studio](/docs/module/05-build-rag-data-azure-ai-studio.md) | 41 min | Concluído |
+| ✅ [Introduction to AI Agent Service Security Controls](/docs/module/07-intro-ai-agent-service-security-controls.md) | 20 min | Concluído |
 
 ## 📚 Módulos em Andamento
 
 | Módulo | Duração Estimada |
 |--------|------------------|
-| Conceitos básicos dos agentes de IA no Azure | 49 min |
-| Criar uma solução de copiloto baseada em RAG com seus próprios dados usando o Azure AI Studio | 41 min |
-| Introduction to AI Agent Service Security Controls | 20 min |
 | Desenvolver um agente de IA com o Serviço do Agente de IA do Azure | 55 min |
 | Integrar ferramentas personalizadas ao seu agente | 53 min |
 | Orchestrate a multi-agent solution using Semantic Kernel | 56 min |
