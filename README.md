@@ -22,15 +22,9 @@ Participar do AI Skills Challenge e concluir com excelência os módulos propost
 | ✅ [Conceitos básicos dos agentes de IA no Azure](/docs/module/06-basic-ai-agents-azure.md) | 49 min | Concluído |
 | ✅ [Criar uma solução de copiloto baseada em RAG com seus próprios dados usando o Azure AI Studio](/docs/module/05-build-rag-data-azure-ai-studio.md) | 41 min | Concluído |
 | ✅ [Introduction to AI Agent Service Security Controls](/docs/module/07-intro-ai-agent-service-security-controls.md) | 20 min | Concluído |
-
-## 📚 Módulos em Andamento
-
-| Módulo | Duração Estimada |
-|--------|------------------|
-| Desenvolver um agente de IA com o Serviço do Agente de IA do Azure | 55 min |
-| Integrar ferramentas personalizadas ao seu agente | 53 min |
-| Orchestrate a multi-agent solution using Semantic Kernel | 56 min |
-
+| ✅ [Desenvolver um agente de IA com o Serviço do Agente de IA do Azure](/docs/module/08-develop-ai-agent-azure-service.md) | 55 min | Concluído |
+| ✅ [Integrar ferramentas personalizadas ao seu agente](/docs/module/09-integrate-custom-tools-into-agent.md) | 53 min | Concluído |
+| ✅ [Orchestrate a multi-agent solution using Semantic Kernel](/docs/module/10-orchestrate-multi-agente-solution-semantic-kernel.md) | 56 min | Concluído |
 
 ## 🔧 Habilidades Desenvolvidas
 
