@@ -1,22 +1,27 @@
 # Azure Agentic AI Challenge
 
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](#run-the-python-example)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Tests: unittest](https://img.shields.io/badge/Tests-unittest-3776AB)](#run-offline-tests)
+
 Learning notes and exercises from Jacivaldo Carvalho's participation in the Microsoft AI Skills Challenge 2025. Topics include Azure AI Foundry, generative AI, retrieval-augmented generation (RAG), AI agents, and Semantic Kernel.
 
 This repository contains study guides and one standalone Python example that sends a history question to Azure OpenAI. The applications described in the guides are learning exercises, rather than complete applications implemented here.
 
 ## Repository contents
 
+- [Documentation index and compatibility notes](docs/README.md): all modules, exercises, and validation boundaries.
 - [Module notes](docs/module/): concepts and summaries from the challenge.
 - [Exercise guides](docs/exercise/): walkthroughs, code excerpts, and screenshots.
 - [Python example](exercises/01-history-assistant.py): an interactive history assistant using Azure OpenAI.
 
-The guides and screenshots reflect the 2025 learning material. Most guides and the example's system prompt are currently in Portuguese. Portal instructions and SDK excerpts have not been verified against current Azure services.
+The English guides document the 2025 learning material. Screenshots and the executable example's system prompt retain their original Portuguese content. Historical SDK excerpts are labeled, with [compatibility references](docs/README.md#scope-and-compatibility) for current documentation. Cloud exercises and external lab applications have not been integration-tested here.
 
 ## Module notes
 
 | Module | Notes |
 | --- | --- |
-| 01 | [Plan and prepare Azure AI solutions](docs/module/01-planning-azure-ai-solutions.md.md) |
+| 01 | [Plan and prepare Azure AI solutions](docs/module/01-planning-azure-ai-solutions.md) |
 | 02 | [Explore and deploy models in Azure AI Foundry](docs/module/02-explore-and-deploy-models-azure-ai-foundry.md) |
 | 03 | [Develop an AI application with Azure AI Foundry](docs/module/03-develop-ai-app-azure-ai-foundry.md) |
 | 04 | [Introduction to prompt flow](docs/module/04-intro-prompt-flow-develop-language-model-app-azure-ai-studio.md) |
@@ -25,7 +30,7 @@ The guides and screenshots reflect the 2025 learning material. Most guides and t
 | 07 | [AI Agent Service security controls](docs/module/07-intro-ai-agent-service-security-controls.md) |
 | 08 | [Develop an agent with Azure AI Agent Service](docs/module/08-develop-ai-agent-azure-service.md) |
 | 09 | [Integrate custom tools into an agent](docs/module/09-integrate-custom-tools-into-agent.md) |
-| 10 | [Orchestrate multiple agents with Semantic Kernel](docs/module/10-orchestrate-multi-agente-solution-semantic-kernel.md) |
+| 10 | [Orchestrate multiple agents with Semantic Kernel](docs/module/10-orchestrate-multi-agent-solution-semantic-kernel.md) |
 
 ## Run the Python example
 

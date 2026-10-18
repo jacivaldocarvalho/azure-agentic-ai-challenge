@@ -1,89 +1,63 @@
-# Desenvolvendo um Agente de IA com o Azure AI Foundry 
+# Explore AI agent development in Azure AI Foundry
 
-**Índice**  
-- [Desenvolvendo um Agente de IA com o Azure AI Foundry](#desenvolvendo-um-agente-de-ia-com-o-azure-ai-foundry)
-  - [Introdução](#introdução)
-  - [Pré-requisitos](#pré-requisitos)
-  - [Criando um Projeto no Azure AI Foundry](#criando-um-projeto-no-azure-ai-foundry)
-  - [Implantando um Modelo de IA Generativa](#implantando-um-modelo-de-ia-generativa)
-  - [Criando um Agente de IA](#criando-um-agente-de-ia)
-  - [Testando o Agente](#testando-o-agente)
-  - [Limpeza dos Recursos](#limpeza-dos-recursos)
-  - [Conclusão](#conclusão)
+> Study notes from the 2025 challenge. See the [documentation scope and compatibility notes](../README.md#scope-and-compatibility) before following portal instructions or SDK examples.
 
+## Contents
 
-## Introdução  
-Neste artigo, exploraremos como criar um agente de IA simples usando o serviço **Azure AI Agent** no portal **Azure AI Foundry**. O agente será capaz de responder perguntas sobre políticas de reembolso de despesas com base em um documento fornecido.  
+- [Objective and prerequisites](#objective-and-prerequisites)
+- [Create a lab project](#create-a-lab-project)
+- [Deploy a model](#deploy-a-model)
+- [Configure the expenses agent](#configure-the-expenses-agent)
+- [Test against the document](#test-against-the-document)
+- [Cleanup and outcome](#cleanup-and-outcome)
+- [Original learning references](#original-learning-references)
 
-## Pré-requisitos  
-- Acesso ao **Azure AI Foundry** ([https://ai.azure.com](https://ai.azure.com))  
-- Credenciais do Azure  
-- Documento da política de despesas (disponível para download)  
+## Objective and prerequisites
 
-## Criando um Projeto no Azure AI Foundry  
-Para começar, siga os passos abaixo:  
+Create an expenses-policy assistant using the portal's agent experience and file-based knowledge. You need an Azure subscription, access to the portal, permissions for the project, and the expense-policy document used by the external lab.
 
-1. Acesse o portal **Azure AI Foundry** e faça login com suas credenciais do Azure.  
-2. Feche quaisquer painéis de dicas ou início rápido que apareçam.  
-3. Selecione **+ Criar projeto**.  
-4. No assistente de criação:  
-   - Defina um nome para o projeto (ex.: `meu-projeto-ia`).  
-   - Escolha a opção de criar um novo hub.  
-5. Personalize as configurações do hub:  
-   - **Nome do hub**: Um nome exclusivo (ex.: `meu-hub-ia`).  
-   - **Assinatura**: Sua assinatura do Azure.  
-   - **Grupo de recursos**: Crie um novo ou selecione um existente.  
-   - **Região**: Escolha entre `eastus`, `eastus2`, `swedencentral`, `westus` ou `westus3`.  
-   - **Recursos de IA**: Crie um novo serviço de IA ou use um existente.  
-   - **Azure AI Search**: Pule esta etapa.  
-6. Revise as configurações e selecione **Criar**.  
+## Create a lab project
 
-## Implantando um Modelo de IA Generativa  
-Após criar o projeto, implante um modelo de linguagem generativa:  
+The 2025 walkthrough created a hub-based project with a dedicated resource group and AI resource. It listed example regions including `eastus`, `eastus2`, `swedencentral`, `westus`, and `westus3`. Those are historical choices; verify current model and tool availability for the subscription before provisioning.
 
-1. No menu à esquerda, vá para **Modelos + endpoints**.  
-2. Na aba **Implantações de modelo**, selecione **Implantar modelo base**.  
-3. Procure pelo modelo **gpt-4o** e confirme a seleção.  
-4. Personalize a implantação com:  
-   - **Nome da implantação**: Ex.: `gpt-4o`.  
-   - **Tipo de implantação**: Global Standard.  
-   - **Atualização automática de versão**: Habilitada.  
-   - **Versão do modelo**: A mais recente disponível.  
-   - **Recurso de IA conectado**: Selecione seu recurso do Azure OpenAI.  
-   - **Limite de tokens por minuto**: 50K (ou o máximo permitido).  
-   - **Filtro de conteúdo**: DefaultV2.  
-5. Aguarde a conclusão da implantação.  
+The original portal flow did not require an Azure AI Search connection for this file-search exercise.
 
-## Criando um Agente de IA  
-Com o modelo implantado, crie um agente:  
+## Deploy a model
 
-1. Faça o download do documento **Expenses_policy.docx** [aqui](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-ai-agents/main/Labfiles/01-agent-fundamentals/Expenses_Policy.docx).  
-2. No portal **Azure AI Foundry**, vá para a página **Agentes**.  
-3. Crie um novo agente (ou use um gerado automaticamente).  
-4. Configure o agente:  
-   - **Nome do agente**: `ExpensesAgent`.  
-   - **Modelo implantado**: Selecione o `gpt-4o` implantado anteriormente.  
-   - **Instruções**: "Responda perguntas relacionadas a reembolsos de despesas."  
-5. Adicione conhecimento ao agente:  
-   - Selecione **+ Adicionar** em **Conhecimento**.  
-   - Crie um novo **armazenamento vetorial** chamado `Expenses_Vector_Store`.  
-   - Faça upload do arquivo **Expenses_policy.docx**.  
+The course selected GPT-4o from **Models + endpoints** and used an example Global Standard deployment, automatic version updates, a 50K TPM allocation where available, and the DefaultV2 content filter. These are recorded lab settings, not fixed requirements or guaranteed capacity.
 
-## Testando o Agente  
-Para verificar o funcionamento do agente:  
+Keep the deployment name consistent with the model selected by the agent.
 
-1. No painel de configuração do agente, selecione **Testar no playground**.  
-2. Digite perguntas como:  
-   - *"Qual é o valor máximo que posso reivindicar para refeições?"*  
-   - *"E para hospedagem?"*  
-3. Analise as respostas com base no documento carregado.  
+## Configure the expenses agent
 
-## Limpeza dos Recursos  
-Para evitar custos desnecessários:  
+Obtain [Expenses_Policy.docx](https://raw.githubusercontent.com/MicrosoftLearning/mslearn-ai-agents/main/Labfiles/01-agent-fundamentals/Expenses_Policy.docx) from the original lab or locate its replacement through the [upstream exercise index](https://microsoftlearning.github.io/mslearn-ai-agents/). Asset paths on an upstream branch can change.
 
-1. Acesse o **portal do Azure** ([https://portal.azure.com](https://portal.azure.com)).  
-2. Navegue até o grupo de recursos criado.  
-3. Selecione **Excluir grupo de recursos** e confirme.  
+In the historical agent configuration experience:
 
-## Conclusão  
-Neste artigo, você aprendeu a criar e configurar um agente de IA no **Azure AI Foundry**, utilizando um modelo generativo e dados de contexto para responder perguntas específicas. Experimente expandir o agente com mais funcionalidades ou integrações!
+1. Create an agent named `ExpensesAgent`.
+2. Select the deployed model.
+3. Provide task instructions, such as “Answer questions about expense reimbursements using the supplied policy.”
+4. Add file knowledge and create a vector store, such as `Expenses_Vector_Store`.
+5. Upload the policy document and wait for processing to complete.
+
+This is an illustrative English instruction for the external lab, not a modification to any agent deployed by this repository.
+
+## Test against the document
+
+Open the agent playground and ask:
+
+- “What is the maximum amount I can claim for meals?”
+- “What about accommodation?”
+
+Check the answers against the policy and verify that the second question uses the prior context. Test a question whose answer is absent from the document and inspect whether the agent acknowledges the limitation.
+
+The repository does not contain a configured agent, policy document, or vector store. Its offline Python tests do not validate this portal exercise.
+
+## Cleanup and outcome
+
+Remove temporary agent data, uploaded files, vector stores, and deployments where applicable. Delete a resource group only after confirming it is dedicated to the lab. This exercise illustrates model instructions and file grounding; it does not implement expense submission.
+
+## Original learning references
+
+- [Ai.azure.com](https://ai.azure.com)
+- [Portal.azure.com](https://portal.azure.com)

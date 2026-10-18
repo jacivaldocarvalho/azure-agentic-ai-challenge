@@ -1,180 +1,80 @@
-# **Criando um Aplicativo de IA Generativa com Seus Próprios Dados Usando RAG**
+# Create a generative AI application with your own data
 
-## Índice
+> Study notes from the 2025 challenge. See the [documentation scope and compatibility notes](../README.md#scope-and-compatibility) before following portal instructions or SDK examples.
+> Python SDK excerpts use the historical connection-string API; they are not compatible examples for an arbitrary current SDK installation.
 
-- [**Criando um Aplicativo de IA Generativa com Seus Próprios Dados Usando RAG**](#criando-um-aplicativo-de-ia-generativa-com-seus-próprios-dados-usando-rag)
-  - [Índice](#índice)
-  - [**Introdução**](#introdução)
-  - [**Pré-requisitos**](#pré-requisitos)
-  - [**Passo 1: Criando um Projeto no Azure AI Foundry**](#passo-1-criando-um-projeto-no-azure-ai-foundry)
-  - [**Passo 2: Implantando Modelos Necessários**](#passo-2-implantando-modelos-necessários)
-  - [**Passo 3: Adicionando Dados Personalizados**](#passo-3-adicionando-dados-personalizados)
-  - [**Passo 4: Criando um Índice de Busca**](#passo-4-criando-um-índice-de-busca)
-  - [**Passo 5: Testando o Índice no Playground**](#passo-5-testando-o-índice-no-playground)
-  - [**Passo 6: Criando um Aplicativo RAG com SDKs**](#passo-6-criando-um-aplicativo-rag-com-sdks)
-    - [**Preparando a Configuração**](#preparando-a-configuração)
-    - [**Executando o Aplicativo**](#executando-o-aplicativo)
-  - [**Conclusão**](#conclusão)
-  - [**Limpeza de Recursos**](#limpeza-de-recursos)
-  - [**Referência**](#referência)
+## Contents
 
-## **Introdução**  
-Neste artigo, vamos explorar como criar um aplicativo de IA generativa que utiliza seus próprios dados por meio da técnica **Retrieval Augmented Generation (RAG)**. Essa abordagem permite integrar fontes de dados personalizadas em prompts para modelos de IA generativa, melhorando a precisão e relevância das respostas.  
+- [Objective and prerequisites](#objective-and-prerequisites)
+- [Create the project and deploy models](#create-the-project-and-deploy-models)
+- [Add the brochures](#add-the-brochures)
+- [Create a search index](#create-a-search-index)
+- [Compare answers with and without grounding](#compare-answers-with-and-without-grounding)
+- [Prepare the external SDK lab](#prepare-the-external-sdk-lab)
+- [Run the external application](#run-the-external-application)
+- [Outcome and cleanup](#outcome-and-cleanup)
+- [Original learning references](#original-learning-references)
 
-Utilizaremos o **Azure AI Foundry** e os **SDKs do Azure OpenAI** para desenvolver uma solução que consulte documentos personalizados (neste caso, folhetos de viagem) e gere respostas contextualizadas.  
+## Objective and prerequisites
 
+Use travel brochures as grounding data for a conversational assistant. The original exercise combined a hub-based Azure AI Foundry project, Azure AI Search, an embedding deployment, and a chat deployment. It assumed familiarity with Python or C# and an Azure subscription with suitable permissions and quota.
 
-## **Pré-requisitos**  
-- Uma conta **Azure** com acesso ao **Azure AI Foundry**.  
-- Conhecimento básico de Python ou C# (dependendo da linguagem escolhida).  
-- Pacotes necessários instalados (serão detalhados ao longo do artigo).  
+## Create the project and deploy models
 
+Create a dedicated project and resource group with an AI resource and Azure AI Search. Choose a region and service configuration that support the required deployments.
 
-## **Passo 1: Criando um Projeto no Azure AI Foundry**  
+The historical example used `text-embedding-ada-002` for embeddings and `gpt-4` for response generation, with example Standard deployments and 5K TPM limits. These names and settings are part of the 2025 walkthrough. They are not current deployment recommendations or guaranteed available capacity.
 
-1. **Acesse o Portal Azure AI Foundry**:  
-   - Abra [https://ai.azure.com](https://ai.azure.com) e faça login com suas credenciais Azure.  
+## Add the brochures
 
-2. **Crie um Novo Projeto**:  
-   - Selecione **+ Create project**.  
-   - Defina um nome para o projeto (ex: `my-ai-project`).  
-   - Crie um novo **hub** com as seguintes configurações:  
-     - **Hub name**: `my-ai-hub`  
-     - **Subscription**: Sua assinatura Azure.  
-     - **Resource group**: Crie um novo (ex: `my-ai-resources`).  
-     - **Location**: Escolha uma região com suporte para `gpt-4` e `text-embedding-ada-002`.  
-     - **AI Services**: Crie um novo recurso (ex: `my-ai-services`).  
-     - **Azure AI Search**: Crie um novo recurso.  
+The original data came from the [Microsoft Learning brochure archive](https://github.com/MicrosoftLearning/mslearn-ai-studio/raw/main/data/brochures.zip). Download it from the upstream lab, extract the documents into a `brochures` folder, and inspect them before uploading.
 
-3. **Revise e Crie o Projeto**:  
-   - Confirme as configurações e selecione **Create**.  
+In the historical portal, **Data + indexes** provided a data-asset upload experience. Add only data intended for the lab and verify which project identities can access it.
 
+## Create a search index
 
-## **Passo 2: Implantando Modelos Necessários**  
+The example created `brochures-index` from the uploaded data with vector search enabled and a matching embedding deployment. Index preparation turns the source content into searchable passages and metadata. Wait for indexing to complete and inspect results before using them in a chat application.
 
-Para implementar o RAG, precisamos de dois modelos:  
+The index and embedding configuration must agree on vector dimensions and the embedding representation. Index creation, storage, and queries can incur charges.
 
-1. **Modelo de Embedding** (`text-embedding-ada-002`):  
-   - Vai vetorizar os dados para indexação e busca eficiente.  
-   - Configurações:  
-     - **Deployment name**: `text-embedding-ada-002`  
-     - **Deployment type**: Standard  
-     - **TPM Rate Limit**: 5K  
+## Compare answers with and without grounding
 
-2. **Modelo de Geração de Respostas** (`gpt-4`):  
-   - Responsável por gerar respostas baseadas nos dados recuperados.  
-   - Configurações:  
-     - **Deployment name**: `gpt-4`  
-     - **Deployment type**: Standard  
-     - **TPM Rate Limit**: 5K  
+In the chat playground, ask “Where can I stay in New York?” before attaching the index. Then connect the indexed data and repeat the question. Compare the answer against the brochures rather than assuming a changed response is automatically more accurate.
 
+Look for supported details, source references, and an appropriate response when the documents do not contain an answer. Grounding supplies evidence but does not guarantee correctness.
 
-## **Passo 3: Adicionando Dados Personalizados**  
+## Prepare the external SDK lab
 
-1. **Baixe os Dados de Exemplo**:  
-   - Faça download dos folhetos de viagem em [https://github.com/MicrosoftLearning/mslearn-ai-studio/raw/main/data/brochures.zip](https://github.com/MicrosoftLearning/mslearn-ai-studio/raw/main/data/brochures.zip).  
-   - Extraia os arquivos em uma pasta chamada `brochures`.  
+The complete RAG application is maintained upstream, not in this repository:
 
-2. **Adicione os Dados ao Projeto**:  
-   - No Azure AI Foundry, vá para **Data + indexes**.  
-   - Selecione **+ New data** e faça upload da pasta `brochures`.  
+```bash
+git clone https://github.com/MicrosoftLearning/mslearn-ai-studio mslearn-ai-foundry
+```
 
+Find the matching own-data exercise in the [upstream exercise index](https://microsoftlearning.github.io/mslearn-ai-studio/). In its Python or C# project directory, use the dependencies and configuration expected by that revision. Do not apply this repository's history-assistant `requirements.txt` to an unrelated RAG application.
 
-## **Passo 4: Criando um Índice de Busca**  
+The historical Python package list included `python-dotenv`, `azure-ai-projects`, `azure-identity`, and `openai`. The C# lab used `Azure.Identity`, `Azure.AI.Projects`, and `Azure.AI.OpenAI`, including preview packages. A current unpinned installation is not a substitute for the versions used by that lab.
 
-1. **Crie um Novo Índice**:  
-   - Vá para **Data + indexes > Indexes**.  
-   - Selecione **+ New index**.  
-   - Configurações:  
-     - **Data source**: `brochures`  
-     - **Vector index**: `brochures-index`  
-     - **Vector settings**: Habilite **vector search**.  
-     - **Embedding model**: `text-embedding-ada-002`  
+Configure the external lab's `.env` or `appsettings.json` with its project access, model deployment, and search settings. Historical connection strings differ from the endpoint-based API described by current SDK documentation.
 
-2. **Aguarde a Indexação**:  
-   - Pode levar alguns minutos dependendo do volume de dados.  
+## Run the external application
 
+After completing the upstream lab's code and configuration, run its Python application from that lab directory:
 
-## **Passo 5: Testando o Índice no Playground**  
+```bash
+python rag-app.py
+```
 
-1. **Acesse o Chat Playground**:  
-   - No Azure AI Foundry, vá para **Playgrounds > Chat playground**.  
+For C#, use `dotnet run`. Test “Where should I stay in London?” and then “What can I do there?” Verify that retrieval, conversational context, and generated answers remain tied to the brochures.
 
-2. **Teste sem Dados Personalizados**:  
-   - Envie a pergunta: *"Where can I stay in New York?"*  
-   - Observe que a resposta é genérica.  
+`rag-app.py`, the .NET project, and the brochure data are not included in this repository. These instructions describe the external learning workflow, not an integration validated by the local test suite.
 
-3. **Adicione o Índice e Teste Novamente**:  
-   - No painel **Add your data**, selecione `brochures-index`.  
-   - Reenvie a mesma pergunta e veja a resposta baseada nos folhetos.  
+## Outcome and cleanup
 
+The exercise demonstrates a retrieval-and-generation workflow: prepare data, retrieve relevant passages, and use them as model context. Remove lab-only indexes, deployments, compute, and other resources when finished. Confirm the contents before deleting an entire resource group.
 
-## **Passo 6: Criando um Aplicativo RAG com SDKs**  
+## Original learning references
 
-### **Preparando a Configuração**  
-
-1. **Obtenha a String de Conexão do Projeto**:  
-   - No **Overview** do projeto, copie a **Project connection string**.  
-
-2. **Configure o Ambiente de Desenvolvimento**:  
-   - Abra o **Azure Cloud Shell** (PowerShell).  
-   - Clone o repositório de exemplo:  
-     ```bash
-     git clone https://github.com/microsoftlearning/mslearn-ai-studio mslearn-ai-foundry
-     ```  
-   - Navegue até a pasta do projeto (Python ou C#).  
-
-3. **Instale as Dependências**:  
-   - **Python**:  
-     ```bash
-     pip install python-dotenv azure-ai-projects azure-identity openai
-     ```  
-   - **C#**:  
-     ```bash
-     dotnet add package Azure.Identity
-     dotnet add package Azure.AI.Projects --prerelease
-     dotnet add package Azure.AI.OpenAI --prerelease
-     ```  
-
-4. **Edite o Arquivo de Configuração**:  
-   - Substitua os placeholders no arquivo `.env` (Python) ou `appsettings.json` (C#) com suas credenciais.  
-
-### **Executando o Aplicativo**  
-
-1. **Execute o Código**:  
-   - **Python**:  
-     ```bash
-     python rag-app.py
-     ```  
-   - **C#**:  
-     ```bash
-     dotnet run
-     ```  
-
-2. **Teste o Chat**:  
-   - Faça perguntas como:  
-     - *"Where should I stay in London?"*  
-     - *"What can I do there?"*  
-   - Observe as respostas baseadas nos folhetos.  
-
-
-## **Conclusão**  
-
-Neste artigo, implementamos um aplicativo de IA generativa usando **RAG (Retrieval Augmented Generation)** no **Azure AI Foundry**. Aprendemos como:  
-
-✅ Criar um projeto e implantar modelos.  
-✅ Adicionar e indexar dados personalizados.  
-✅ Desenvolver um aplicativo que consulta dados específicos para gerar respostas precisas.  
-
-Essa abordagem é útil para chatbots, assistentes virtuais e outras aplicações que exigem respostas baseadas em informações confiáveis.  
-
-
-## **Limpeza de Recursos**  
-
-Para evitar custos desnecessários:  
-
-1. Acesse o [Azure Portal](https://portal.azure.com).  
-2. Exclua o **Resource Group** criado para este exercício.  
-
-## **Referência**
-[Create a generative AI app that uses your own data](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/04-Use-own-data.html)
+- [Ai.azure.com](https://ai.azure.com)
+- [Portal.azure.com](https://portal.azure.com)
+- [04 use own data](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/04-Use-own-data.html)

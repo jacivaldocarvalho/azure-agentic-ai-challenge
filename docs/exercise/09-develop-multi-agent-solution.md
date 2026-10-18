@@ -1,160 +1,148 @@
-# Desenvolvendo uma Solução Multiagente com Azure AI
+# Explore a multi-agent solution with Semantic Kernel
 
-## Índice
-- [Desenvolvendo uma Solução Multiagente com Azure AI](#desenvolvendo-uma-solução-multiagente-com-azure-ai)
-  - [Índice](#índice)
-  - [Introdução](#introdução)
-  - [Criar um Projeto no Azure AI Foundry](#criar-um-projeto-no-azure-ai-foundry)
-  - [Implantar um Modelo de IA Generativa](#implantar-um-modelo-de-ia-generativa)
-  - [Preparar o Ambiente de Desenvolvimento](#preparar-o-ambiente-de-desenvolvimento)
-  - [Criar os Agentes de IA](#criar-os-agentes-de-ia)
-    - [Agente Gerenciador de Incidentes](#agente-gerenciador-de-incidentes)
-    - [Assistente DevOps](#assistente-devops)
-  - [Implementar a Lógica de Chat em Grupo](#implementar-a-lógica-de-chat-em-grupo)
-    - [Estratégia de Seleção](#estratégia-de-seleção)
-    - [Estratégia de Término](#estratégia-de-término)
-    - [Configurar o Chat em Grupo](#configurar-o-chat-em-grupo)
-  - [Executar a Solução Multiagente](#executar-a-solução-multiagente)
-  - [Limpeza de Recursos](#limpeza-de-recursos)
-  - [Conclusão](#conclusão)
-  - [Referência](#referência)
+> Study notes from the 2025 challenge. See the [documentation scope and compatibility notes](../README.md#scope-and-compatibility) before following portal instructions or SDK examples.
+> Python SDK excerpts use the historical connection-string API; they are not compatible examples for an arbitrary current SDK installation.
+> `AgentGroupChat` examples document an archived experimental API; see the [orchestration compatibility notes](../README.md#semantic-kernel-orchestration).
 
+## Contents
 
-## Introdução
-Neste artigo, você aprenderá a criar uma solução com múltiplos agentes de IA que trabalham em conjunto usando o Semantic Kernel SDK. Desenvolveremos:
+- [Objective and scope](#objective-and-scope)
+- [Prepare Azure resources and the external workspace](#prepare-azure-resources-and-the-external-workspace)
+- [Create and wrap the agent definitions](#create-and-wrap-the-agent-definitions)
+- [Define historical selection and termination strategies](#define-historical-selection-and-termination-strategies)
+- [Configure the group chat](#configure-the-group-chat)
+- [Inspect results and limitations](#inspect-results-and-limitations)
+- [Cleanup](#cleanup)
+- [Original learning references](#original-learning-references)
 
-1. **Agente Gerenciador de Incidentes**: Analisa arquivos de log e identifica problemas
-2. **Assistente DevOps**: Executa ações corretivas recomendadas
+## Objective and scope
 
-A solução completa será capaz de:
-- Analisar automaticamente logs de serviço
-- Recomendar ações corretivas
-- Executar as correções necessárias
-- Verificar se as resoluções foram bem-sucedidas
+Study an incident-management conversation with an `IncidentManager` and a `DevOpsAssistant`. The first participant reviews logs and recommends next steps; the second discusses the proposed response. The original guide estimated about 30 minutes for the external lab.
 
-**Tempo estimado**: 30 minutos
+This repository does not include log ingestion, remediation tools, service-restart permissions, or an executable multi-agent application. A conversation about a restart does not restart a service. The following fragments explain the historical architecture without claiming those integrations exist.
 
+## Prepare Azure resources and the external workspace
 
-## Criar um Projeto no Azure AI Foundry
-1. Acesse o [portal Azure AI Foundry](https://ai.azure.com)
-2. Selecione **+ Create project**
-3. Configure o projeto com:
-   - Nome personalizado
-   - Região suportada (eastus, eastus2, etc.)
-   - Novo recurso de Azure AI Services
-4. Revise e confirme a criação
+The 2025 course used a project and model deployment in Azure AI Foundry. Its GPT-4o, Global Standard, DefaultV2, and 60K TPM settings were lab examples; confirm actual service support and capacity before provisioning.
 
+Clone into the explicitly named directory so subsequent paths agree with the checkout name:
 
-## Implantar um Modelo de IA Generativa
-1. No painel esquerdo, acesse **Models + endpoints**
-2. Selecione **Deploy base model** e escolha `gpt-4o`
-3. Configure com:
-   - Nome personalizado
-   - Tipo: Global Standard
-   - Limite de tokens: 60K/min
-   - Filtro de conteúdo: DefaultV2
-4. Aguarde a conclusão da implantação
-
-
-## Preparar o Ambiente de Desenvolvimento
-No Azure Cloud Shell (PowerShell):
-
-```powershell
-git clone https://github.com/MicrosoftLearning/mslearn-ai-agents
-cd ai-agents/Labfiles/05-agent-orchestration/Python
-python -m venv labenv
-./labenv/bin/Activate.ps1
-pip install python-dotenv azure-identity semantic-kernel[azure]
+```bash
+git clone https://github.com/MicrosoftLearning/mslearn-ai-agents ai-agents
 ```
 
-Edite o arquivo `.env` com suas credenciais:
-- Connection string do projeto
-- Nome da implantação do modelo
+The original lab path was `ai-agents/Labfiles/05-agent-orchestration/Python`. It is historical and may not exist on the upstream default branch. Use the upstream exercise index or a matching revision rather than assuming the path and package versions are current.
 
+From the selected Linux or Cloud Shell Bash lab directory, create an isolated environment:
 
-## Criar os Agentes de IA
-### Agente Gerenciador de Incidentes
+```bash
+python3 -m venv labenv
+source labenv/bin/activate
+```
+
+The original dependency set included `python-dotenv`, `azure-identity`, and `semantic-kernel[azure]`. A current install is not guaranteed to expose the archived `AgentGroupChat` API. Use the external lab revision's dependency and project-configuration instructions.
+
+## Create and wrap the agent definitions
+
+These historical fragments belong inside an async function after configuring the asynchronous project client, credential, and deployment. `client`, `credential`, and the actual service deployment are supplied by that external application.
+
 ```python
-incident_agent = await client.agents.create_agent(
+from semantic_kernel.agents import AzureAIAgent
+
+incident_definition = await client.agents.create_agent(
     model="gpt-4o",
     name="IncidentManager",
-    instructions="Analise logs, identifique problemas e recomende ações..."
+    instructions=(
+        "Analyze the supplied logs and recommend next steps. "
+        "Do not claim to execute actions. When the review is complete, "
+        "respond with exactly: no action needed"
+    ),
 )
-```
-
-### Assistente DevOps
-```python
-devops_agent = await client.agents.create_agent(
+devops_definition = await client.agents.create_agent(
     model="gpt-4o",
     name="DevOpsAssistant",
-    instructions="Execute ações corretivas em serviços..."
+    instructions="Discuss the proposed remediation. Do not claim a service was changed without a tool result.",
 )
+incident_agent = AzureAIAgent(client=client, definition=incident_definition)
+devops_agent = AzureAIAgent(client=client, definition=devops_definition)
 ```
 
+The original guide passed raw service definitions directly to the group chat. The historical Semantic Kernel integration uses agent wrappers. These illustrative definitions provide no service-remediation tools.
 
-## Implementar a Lógica de Chat em Grupo
-### Estratégia de Seleção
-Define qual agente deve responder:
+## Define historical selection and termination strategies
+
+The archived API expects subclasses of its strategy interfaces. These fragments document that pattern and include an empty-history check:
 
 ```python
-class SelectionStrategy:
+from semantic_kernel.agents.strategies import SelectionStrategy, TerminationStrategy
+from semantic_kernel.contents import AuthorRole
+
+
+class IncidentSelectionStrategy(SelectionStrategy):
     async def select_agent(self, agents, history):
-        if history[-1].name == "DevOpsAssistant" or history[-1].role == "USER":
+        if not history or history[-1].role == AuthorRole.USER or history[-1].name == "DevOpsAssistant":
             return next(agent for agent in agents if agent.name == "IncidentManager")
         return next(agent for agent in agents if agent.name == "DevOpsAssistant")
-```
 
-### Estratégia de Término
-Finaliza a conversa quando não há mais ações necessárias:
 
-```python
-class ApprovalTerminationStrategy:
+class ApprovalTerminationStrategy(TerminationStrategy):
     async def should_agent_terminate(self, agent, history):
-        return "no action needed" in history[-1].content.lower()
+        return bool(
+            history
+            and history[-1].name == "IncidentManager"
+            and (history[-1].content or "").strip().lower() == "no action needed"
+        )
 ```
 
-### Configurar o Chat em Grupo
+The exact completion phrase is a conversation convention, not evidence that an incident has been resolved or approval to perform an external action. A maximum iteration count is also needed to bound the interaction.
+
+## Configure the group chat
+
+Historical excerpt, inside the same async context with both wrapped agents:
+
 ```python
+from semantic_kernel.agents import AgentGroupChat
+from semantic_kernel.contents import ChatMessageContent, AuthorRole
+
 chat = AgentGroupChat(
     agents=[incident_agent, devops_agent],
-    termination_strategy=ApprovalTerminationStrategy(),
-    selection_strategy=SelectionStrategy()
+    selection_strategy=IncidentSelectionStrategy(),
+    termination_strategy=ApprovalTerminationStrategy(
+        agents=[incident_agent],
+        maximum_iterations=6,
+    ),
 )
+await chat.add_chat_message(
+    message=ChatMessageContent(
+        role=AuthorRole.USER,
+        content="Review this sample log: ServiceX reported a connection timeout.",
+    )
+)
+async for message in chat.invoke():
+    print(f"{message.name}: {message.content}")
 ```
 
+The surrounding application must manage authentication, resource cleanup, errors, and the async entry point. These excerpts are not a standalone `agent_chat.py` and were not run against Azure.
 
-## Executar a Solução Multiagente
-1. Autentique-se no Azure:
-   ```powershell
-   az login
-   ```
-2. Execute o aplicativo:
-   ```powershell
-   python agent_chat.py
-   ```
+## Inspect results and limitations
 
-**Exemplo de saída**:
-```
-INCIDENT_MANAGER > /logs/log1.log | Reinicie o ServiceX
-DEVOPS_ASSISTANT > ServiceX reiniciado com sucesso.
-INCIDENT_MANAGER > Nenhuma ação necessária.
+Illustrative discussion, not output captured from a tested integration:
+
+```text
+IncidentManager: ServiceX reported a connection timeout. Inspect connectivity and recent changes.
+DevOpsAssistant: No service change has been executed. Review the proposed diagnostics first.
+IncidentManager: no action needed
 ```
 
+The final phrase ends this demonstration's discussion. It does not verify service health. Real remediation would require explicit tools, validated inputs, execution permissions, and independent checks of the result.
 
-## Limpeza de Recursos
-1. No Azure Portal, acesse seu grupo de recursos
-2. Selecione **Delete resource group**
-3. Confirme a exclusão
+For a complete external lab, authenticate with `az login` and follow that lab's application entry point. Consult the migration guide before implementing against newer Semantic Kernel orchestration APIs.
 
+## Cleanup
 
-## Conclusão
-Você criou com sucesso uma solução multiagente que:
-1. Detecta automaticamente problemas em logs
-2. Recomenda ações corretivas
-3. Executa as correções necessárias
-4. Verifica os resultados
+Delete temporary agent definitions and other artifacts created by the external application. Remove dedicated cloud resources after reviewing what the resource group contains. The snippets do not clean up resources automatically.
 
-Esta arquitetura pode ser expandida para diversas automações complexas onde múltiplos agentes especializados colaboram para resolver problemas.
+## Original learning references
 
-## Referência
-[Develop a multi-agent solution](https://microsoftlearning.github.io/mslearn-ai-agents/Instructions/05-agent-orchestration.html)
+- [Ai.azure.com](https://ai.azure.com)
+- [05 agent orchestration](https://microsoftlearning.github.io/mslearn-ai-agents/Instructions/05-agent-orchestration.html)
