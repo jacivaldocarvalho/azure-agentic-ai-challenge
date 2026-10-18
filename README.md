@@ -94,7 +94,7 @@ Enter a history question when prompted. The script sends one request and prints 
 - **Deployment or API error:** verify the resource endpoint, the deployment named `gpt-4o`, and support for the script's hardcoded API version and parameters.
 - **Quota or connection error:** check Azure quota and network access. The script reports connection, timeout, and HTTP errors without printing credentials or raw API response bodies.
 
-Missing or blank required environment variables are reported before prompting for input. The program exits with status `0` on success, `1` for handled configuration, input, response, or API errors, and `130` when input is cancelled. No CI workflow is configured yet.
+Missing or blank required environment variables are reported before prompting for input. The program exits with status `0` on success, `1` for handled configuration, input, response, or API errors, and `130` when input is cancelled. The quality workflow checks Python and documentation without Azure credentials.
 
 ### Run offline tests
 
@@ -105,6 +105,27 @@ python -m unittest discover -s tests -v
 ```
 
 The tests simulate the Azure client and do not load local credentials or make Azure requests. They cover configuration validation, successful output, request parameters, empty input and output, cancellation, and sanitized API errors. Running the example itself is a live integration operation that requires credentials and may incur charges.
+
+## Quality checks
+
+With the virtual environment active, install the development dependencies:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Run the same checks used by [the GitHub Actions workflow](.github/workflows/quality.yml):
+
+```bash
+python -m pip check
+python -m ruff check .
+python -m unittest discover -s tests -v
+python tools/check_docs.py
+```
+
+Ruff is pinned in `requirements-dev.txt`; runtime dependencies remain unpinned. The lint configuration enables common error checks without imposing a broad formatting change. The documentation checker uses only the Python standard library and checks inline local links, heading anchors, image targets, fenced code blocks, and Python/JSON excerpt syntax. It does not execute excerpts, fetch external URLs, compile C#, or validate Azure integration.
+
+The workflow is configured for pushes, pull requests, and manual runs with Python 3.12 on Ubuntu. It uses read-only repository permissions and does not require Azure secrets. Package installation requires network access. GitHub execution can be verified after the branch is published.
 
 ## Resource cleanup
 

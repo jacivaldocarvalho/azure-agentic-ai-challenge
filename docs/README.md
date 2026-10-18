@@ -64,6 +64,6 @@ The notes distinguish vector retrieval from keyword retrieval and semantic reran
 
 ## Validation boundaries
 
-The documentation review checks local links, heading anchors, image references, code fences, and syntax of Python and JSON excerpts. These checks do not execute cloud operations, compile C#, validate portal steps, or establish SDK runtime compatibility for external labs. Live resources are not provisioned or changed as part of these checks.
+Run `python tools/check_docs.py` from the repository root to check inline local Markdown links, ATX heading anchors, image targets, code fences, and syntax of Python and JSON excerpts. The checker covers the conventions used in these guides; it is not a full Markdown renderer and does not resolve reference-style links, HTML links, or external URLs. These checks do not execute cloud operations, compile C#, validate portal steps, or establish SDK runtime compatibility for external labs. Live resources are not provisioned or changed as part of these checks.
 
 Cloud exercises may incur charges. Use fictitious data where possible and remove only resources dedicated to the lab after checking for shared dependencies.
