@@ -1,0 +1,3 @@
+# Direct runtime dependencies. Versions are not locked or integration-tested yet.
+openai
+python-dotenv

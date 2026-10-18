@@ -1,129 +1,54 @@
-# **Criando um Aplicativo de Chat com IA Generativa usando Azure AI Foundry**  
-Neste artigo, vamos explorar como criar um aplicativo de chat que utiliza IA generativa para responder perguntas. Usaremos o **Azure AI Foundry SDK** para conectar um projeto a um modelo de linguagem avançado, como o **GPT-4o**, e implementar uma interface de conversação interativa.
+# Create a generative AI chat application
 
-Este exercício leva aproximadamente **40 minutos** e é ideal para desenvolvedores que desejam integrar IA generativa em suas aplicações. 
+> Study notes from the 2025 challenge. See the [documentation scope and compatibility notes](../README.md#scope-and-compatibility) before following portal instructions or SDK examples.
+> Python SDK excerpts use the historical connection-string API; they are not compatible examples for an arbitrary current SDK installation.
 
-## **Índice**  
+## Contents
 
-- [**Criando um Aplicativo de Chat com IA Generativa usando Azure AI Foundry**](#criando-um-aplicativo-de-chat-com-ia-generativa-usando-azure-ai-foundry)
-  - [**Índice**](#índice)
-  - [**Pré-requisitos**](#pré-requisitos)
-  - [**Passo 1: Criando um Projeto no Azure AI Foundry**](#passo-1-criando-um-projeto-no-azure-ai-foundry)
-  - [**Passo 2: Implantando um Modelo de IA Generativa**](#passo-2-implantando-um-modelo-de-ia-generativa)
-  - [**Passo 3: Criando um Aplicativo de Chat**](#passo-3-criando-um-aplicativo-de-chat)
-    - [**Preparando o Ambiente**](#preparando-o-ambiente)
-    - [**Escrevendo o Código do Chat**](#escrevendo-o-código-do-chat)
-      - [**Python**](#python)
-      - [**C#**](#c)
-    - [**Executando o Aplicativo**](#executando-o-aplicativo)
-  - [**Usando o SDK da OpenAI (Opcional)**](#usando-o-sdk-da-openai-opcional)
-  - [**Conclusão**](#conclusão)
-  - [Referência](#referência)
+- [Objective and prerequisites](#objective-and-prerequisites)
+- [Project and deployment setup](#project-and-deployment-setup)
+- [Prepare the external lab workspace](#prepare-the-external-lab-workspace)
+- [Historical Python example](#historical-python-example)
+- [Historical C# excerpt](#historical-c-excerpt)
+- [Run and inspect the conversation](#run-and-inspect-the-conversation)
+- [Optional direct Azure OpenAI client](#optional-direct-azure-openai-client)
+- [Cleanup](#cleanup)
+- [Original learning references](#original-learning-references)
 
+## Objective and prerequisites
 
+Explore a conversational client using the historical Azure AI Foundry project SDK. You need a compatible project, deployment, identity, and lab workspace. The code below documents the old connection-string API and is not a current SDK quickstart.
 
-## **Pré-requisitos**  
-- Uma conta **Azure** ativa.  
-- Acesso ao portal **Azure AI Foundry** ([https://ai.azure.com](https://ai.azure.com)).  
-- Conhecimento básico de **Python** ou **C#** (o tutorial oferece opções para ambas as linguagens).  
+## Project and deployment setup
 
+The 2025 lab created a hub-based project and a model deployment, then used that project's connection string and deployment name in the client configuration. Deployment settings such as region, quota, version policy, and content filtering must match the available service. The original walkthrough used GPT-4o and a 50K TPM example allocation.
 
-## **Passo 1: Criando um Projeto no Azure AI Foundry**  
+## Prepare the external lab workspace
 
-1. **Acesse o Portal Azure AI Foundry**  
-   - Abra o navegador e acesse [https://ai.azure.com](https://ai.azure.com).  
-   - Faça login com suas credenciais Azure.  
+The chat application belongs to the Microsoft Learning repository, not this repository. Clone it into a new directory; do not delete an existing workspace to rerun the instructions:
 
-2. **Crie um Novo Projeto**  
-   - Na página inicial, clique em **+ Create project**.  
-   - Defina um nome para o projeto (ex: `meu-projeto-ia`).  
-   - Selecione a opção para criar um novo **hub** (ex: `meu-hub-ia`).  
+```bash
+git clone https://github.com/MicrosoftLearning/mslearn-ai-studio mslearn-ai-foundry
+```
 
-3. **Configure os Recursos do Azure**  
-   - **Assinatura**: Selecione sua assinatura Azure.  
-   - **Grupo de recursos**: Crie um novo (ex: `meus-recursos-ia`) ou use um existente.  
-   - **Localização**: Selecione a região recomendada para o modelo **GPT-4o**.  
-   - **Azure AI Services**: Crie um novo recurso (ex: `meus-servicos-ia`).  
-   - **Azure AI Search**: Pule esta configuração.  
+The historical lab used these paths beneath that checkout:
 
-4. **Revise e Crie**  
-   - Confirme as configurações e clique em **Create**.  
-   - Aguarde a implantação ser concluída.  
- 
+```text
+labfiles/chat-app/python
+labfiles/chat-app/c-sharp
+```
 
-## **Passo 2: Implantando um Modelo de IA Generativa**  
+Paths on an upstream branch can change. Locate the matching exercise in the [Microsoft Learning exercise index](https://microsoftlearning.github.io/mslearn-ai-studio/) and use its dependency instructions for the selected revision. The original C# notes referenced preview packages, including `Azure.AI.Projects` and `Azure.AI.Inference` version `1.0.0-beta.3`; they were not verified in this repository.
 
-Agora, vamos implantar um modelo de linguagem para uso no chat.  
+## Historical Python example
 
-1. **Acesse a Página de Modelos**  
-   - No menu à esquerda, vá para **Models + endpoints**.  
-   - Clique em **+ Deploy model** e selecione **Deploy base model**.  
+Dependencies used by this excerpt are `python-dotenv`, `azure-identity`, `azure-ai-projects`, and `azure-ai-inference`, with a historical project SDK matching the connection-string API. In the external lab, configure `PROJECT_CONNECTION_STRING` and `MODEL_DEPLOYMENT` in `.env` and authenticate with `az login`.
 
-2. **Selecione o Modelo GPT-4o**  
-   - Busque por **gpt-4o** e confirme a seleção.  
+This excerpt includes the missing `os` import from the original notes. It illustrates the conversation loop and is not covered by the repository's executable-example tests.
 
-3. **Configure a Implantação**  
-   - **Nome da implantação**: `gpt-4o`  
-   - **Tipo de implantação**: **Global Standard**  
-   - **Versão do modelo**: Use a mais recente disponível.  
-   - **Recurso de IA conectado**: Selecione o recurso criado anteriormente.  
-   - **Limite de tokens por minuto (TPM)**: Defina para **50K** (ou o máximo permitido).  
-   - **Filtro de conteúdo**: **DefaultV2**  
-
-4. **Aguarde a Implantação**  
-   - O processo pode levar alguns minutos.  
- 
-
-## **Passo 3: Criando um Aplicativo de Chat**  
-
-Vamos desenvolver um cliente em **Python** ou **C#** para interagir com o modelo.  
-
-### **Preparando o Ambiente**  
-
-1. **Obtenha a String de Conexão**  
-   - No portal Azure AI Foundry, vá para **Overview** e copie a **Project connection string**.  
-
-2. **Configure o Cloud Shell no Azure**  
-   - Abra o **Azure Portal** ([https://portal.azure.com](https://portal.azure.com)).  
-   - Ative o **Cloud Shell** (PowerShell).  
-
-3. **Clone o Repositório do GitHub**  
-   ```bash
-   rm -r mslearn-ai-foundry -f
-   git clone https://github.com/microsoftlearning/mslearn-ai-studio mslearn-ai-foundry
-   ```
-   - Navegue até a pasta do projeto:  
-     - **Python**:  
-       ```bash
-       cd mslearn-ai-foundry/labfiles/chat-app/python
-       ```
-     - **C#**:  
-       ```bash
-       cd mslearn-ai-foundry/labfiles/chat-app/c-sharp
-       ```
-
-4. **Instale as Dependências**  
-   - **Python**:  
-     ```bash
-     pip install python-dotenv azure-identity azure-ai-projects azure-ai-inference
-     ```
-   - **C#**:  
-     ```bash
-     dotnet add package Azure.Identity
-     dotnet add package Azure.AI.Projects --version 1.0.0-beta.3
-     dotnet add package Azure.AI.Inference --version 1.0.0-beta.3
-     ```
-
-5. **Configure o Arquivo de Ambiente**  
-   - Edite `.env` (Python) ou `appsettings.json` (C#) e insira:  
-     - A **string de conexão do projeto**.  
-     - O **nome da implantação do modelo** (ex: `gpt-4o`).  
-
-
-### **Escrevendo o Código do Chat**  
-
-#### **Python**  
 ```python
+import os
+
 from dotenv import load_dotenv
 from azure.identity import DefaultAzureCredential
 from azure.ai.projects import AIProjectClient
@@ -131,121 +56,91 @@ from azure.ai.inference.models import SystemMessage, UserMessage, AssistantMessa
 
 # Carrega configurações
 load_dotenv()
-project_connection = os.getenv("PROJECT_CONNECTION_STRING")
-model_deployment = os.getenv("MODEL_DEPLOYMENT")
+project_connection = os.environ["PROJECT_CONNECTION_STRING"]
+model_deployment = os.environ["MODEL_DEPLOYMENT"]
 
 # Conecta ao projeto
-projectClient = AIProjectClient.from_connection_string(
-    conn_str=project_connection,
-    credential=DefaultAzureCredential())
-
-# Cria cliente de chat
-chat = projectClient.inference.get_chat_completions_client()
-
-# Inicia a conversa
-prompt = [SystemMessage("Você é um assistente de IA útil.")]
-
-while True:
-    input_text = input("Você: ")
-    if input_text.lower() == "quit":
-        break
-    prompt.append(UserMessage(input_text))
-    response = chat.complete(model=model_deployment, messages=prompt)
-    completion = response.choices[0].message.content
-    print(f"IA: {completion}")
-    prompt.append(AssistantMessage(completion))
+with DefaultAzureCredential() as credential:
+    with AIProjectClient.from_connection_string(
+        conn_str=project_connection,
+        credential=credential,
+    ) as projectClient:
+        # Cria cliente de chat
+        chat = projectClient.inference.get_chat_completions_client()
+        # Inicia a conversa
+        prompt = [SystemMessage("You are a helpful AI assistant.")]
+        while True:
+            input_text = input("You: ")
+            if input_text.lower() == "quit":
+                break
+            prompt.append(UserMessage(input_text))
+            response = chat.complete(model=model_deployment, messages=prompt)
+            completion = response.choices[0].message.content
+            print(f"AI: {completion}")
+            prompt.append(AssistantMessage(completion))
 ```
 
-#### **C#**  
+These configuration variables belong to the external lab, not the root `.env.example` for the history assistant. The excerpt omits error handling and conversation-length limits to focus on the learning pattern.
+
+## Historical C# excerpt
+
+This fragment assumes an existing .NET project, the original preview SDKs, and a populated `config` object from the lab's configuration setup. It is not a complete compilable application. The collection initializer adds messages to the SDK options instead of assigning a read-only message collection.
+
 ```csharp
 using Azure.Identity;
 using Azure.AI.Projects;
 using Azure.AI.Inference;
+using System;
+using System.Collections.Generic;
 
 var project_connection = config["ProjectConnectionString"];
 var model_deployment = config["ModelDeployment"];
 
 // Conecta ao projeto
 var projectClient = new AIProjectClient(project_connection, new DefaultAzureCredential());
-
 // Cria cliente de chat
 var chat = projectClient.GetChatCompletionsClient();
-
 // Inicia a conversa
-var prompt = new List<ChatRequestMessage>() {
-    new ChatRequestSystemMessage("Você é um assistente de IA útil.")
+var prompt = new List<ChatRequestMessage> {
+    new ChatRequestSystemMessage("You are a helpful AI assistant.")
 };
 
 while (true)
 {
-    Console.Write("Você: ");
-    string input_text = Console.ReadLine();
-    if (input_text.ToLower() == "quit") break;
-
+    Console.Write("You: ");
+    string? input_text = Console.ReadLine();
+    if (input_text is null || input_text.ToLowerInvariant() == "quit") break;
     prompt.Add(new ChatRequestUserMessage(input_text));
-    var response = chat.Complete(new ChatCompletionsOptions() {
-        Model = model_deployment,
-        Messages = prompt
-    });
-    Console.WriteLine($"IA: {response.Value.Content}");
+    var options = new ChatCompletionsOptions { Model = model_deployment };
+    foreach (var message in prompt) options.Messages.Add(message);
+    var response = chat.Complete(options);
+    Console.WriteLine($"AI: {response.Value.Content}");
     prompt.Add(new ChatRequestAssistantMessage(response.Value.Content));
 }
 ```
 
+## Run and inspect the conversation
 
-### **Executando o Aplicativo**  
-- **Python**:  
-  ```bash
-  python chat-app.py
-  ```
-- **C#**:  
-  ```bash
-  dotnet run
-  ```
+In the external lab's selected language directory, run its completed application:
 
-Teste perguntando:  
-- *"Qual é o animal mais rápido do mundo?"*  
-- *"Onde posso ver um?"*  
+```bash
+python chat-app.py
+```
 
-Digite **quit** para sair.  
+For the .NET project, use `dotnet run`. Try “What is the fastest animal in the world?” followed by “Where can I see one?” Inspect whether the follow-up uses the prior context. Type `quit` to end the conversation.
 
----
+These filenames refer to the external lab checkout. They are not executable entry points in this repository.
 
-## **Usando o SDK da OpenAI (Opcional)**  
-Se preferir, você pode adaptar o código para usar o **OpenAI SDK** diretamente.  
+## Optional direct Azure OpenAI client
 
-1. **Instale o SDK**:  
-   - **Python**:  
-     ```bash
-     pip install openai
-     ```
-   - **C#**:  
-     ```bash
-     dotnet add package Azure.AI.OpenAI --prerelease
-     ```
+The original guide also discussed calling Azure OpenAI directly instead of using project-based inference. For the maintained local example, use [the history assistant](../../exercises/01-history-assistant.py) and its [configuration instructions](../../README.md#run-the-python-example). It sends one question rather than implementing the multi-turn loop above.
 
-2. **Modifique o Código**:  
-   Substitua o cliente de chat por:  
-   ```python
-   openai_client = projectClient.inference.get_azure_openai_client()
-   response = openai_client.chat.completions.create(
-       model=model_deployment,
-       messages=prompt
-   )
-   ```
+## Cleanup
 
+Remove resources created only for the exercise when finished. Review the resource group's contents before deleting it. Keep credentials out of committed configuration and shared terminal output.
 
-## **Conclusão**  
-Neste tutorial, você:  
-✅ Criou um projeto no **Azure AI Foundry**.  
-✅ Implantou o modelo **GPT-4o**.  
-✅ Desenvolveu um **aplicativo de chat** em Python ou C#.  
+## Original learning references
 
-Agora você pode expandir esse projeto integrando-o a um **frontend web** ou adicionando mais funcionalidades!  
-
-Para evitar custos desnecessários, **exclua o grupo de recursos** no Azure Portal após o uso.  
-
-🚀 **Pronto para inovar com IA generativa?** Experimente e compartilhe seus resultados!
-
-## Referência
-[Create a generative AI chat app](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/02a-AI-foundry-sdk.html)
+- [Ai.azure.com](https://ai.azure.com)
+- [Portal.azure.com](https://portal.azure.com)
+- [02a ai foundry sdk](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/02a-AI-foundry-sdk.html)

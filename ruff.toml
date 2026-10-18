@@ -1,0 +1,5 @@
+target-version = "py312"
+
+[lint]
+# Catch common Python errors without enforcing a broad style migration.
+select = ["E4", "E7", "E9", "F"]

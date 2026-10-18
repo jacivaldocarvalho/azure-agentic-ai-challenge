@@ -1,135 +1,71 @@
-# **Como Escolher e Implantar um Modelo de Linguagem no Azure AI Foundry**  
+# Choose and deploy a language model
 
-O **Azure AI Foundry** oferece um catálogo centralizado de modelos que permite explorar e utilizar diversas opções para criar cenários de IA generativa. Neste artigo, vamos guiá-lo passo a passo na escolha e implantação de um modelo de linguagem adequado para uma aplicação de resolução de problemas.  
+> Study notes from the 2025 challenge. See the [documentation scope and compatibility notes](../README.md#scope-and-compatibility) before following portal instructions or SDK examples.
 
-## **Explorando o Catálogo de Modelos**  
+## Contents
 
-O **catálogo de modelos do Azure AI Foundry** é um repositório onde você pode comparar e selecionar diferentes modelos para sua solução de IA generativa.  
+- [Objective](#objective)
+- [Prepare the project](#prepare-the-project)
+- [Explore inference and the catalog](#explore-inference-and-the-catalog)
+- [Deploy the candidates](#deploy-the-candidates)
+- [Compare answers in the playground](#compare-answers-in-the-playground)
+- [Additional challenge](#additional-challenge)
+- [Cleanup and outcome](#cleanup-and-outcome)
+- [Original learning references](#original-learning-references)
 
-Neste exercício, você irá:  
-1. **Criar um hub e projeto no Azure AI Foundry**  
-2. **Explorar e comparar modelos**  
-3. **Implantar modelos**  
-4. **Testar os modelos em um playground de chat**  
+## Objective
 
+Compare models for a problem-solving assistant, deploy suitable candidates, and evaluate them in the chat playground. The original candidates were GPT-4o and Phi-3.5-mini-instruct. They are historical examples, not a statement about current availability or the best model for a new application.
 
-## **1. Criar um Hub e Projeto no Azure AI Foundry**  
+## Prepare the project
 
-Um **Azure AI hub** funciona como um espaço de trabalho colaborativo onde você pode gerenciar projetos. Vamos começar criando um hub e um projeto:  
+In the 2025 portal, create a project and a new hub with an appropriate subscription, resource group, region, and AI resource. The original example did not require Azure AI Search. Verify model availability and quota before provisioning.
 
-1. Acesse o portal do **Azure AI Foundry** em [https://ai.azure.com](https://ai.azure.com) e faça login com suas credenciais do Azure.  
-2. Na página inicial, selecione **+ Create project**.  
-3. No assistente de criação:  
-   - Defina um **nome para o projeto** (ex.: `meu-projeto-ai`).  
-   - Selecione a opção para **criar um novo hub**.  
-4. Personalize as configurações do hub:  
-   - **Nome do hub**: Um nome único (ex.: `meu-hub-ai`).  
-   - **Assinatura**: Sua assinatura do Azure.  
-   - **Grupo de recursos**: Crie um novo (ex.: `meus-recursos-ai`) ou use um existente.  
-   - **Localização**: Selecione **Help me choose** e escolha uma região recomendada (como aquela que suporta **GPT-4o**).  
-   - **Azure AI Services ou Azure OpenAI**: Crie um novo recurso (ex.: `meus-servicos-ai`) ou use um existente.  
-   - **Azure AI Search**: Pule esta configuração.  
-5. Revise as configurações e selecione **Create**.  
+Example resource names for a new lab are `my-ai-project`, `my-ai-hub`, and `my-ai-resources`; they are placeholders rather than existing resources.
 
-> **Observação**: Recursos do Azure OpenAI têm cotas regionais. Se exceder o limite, você pode precisar criar um novo recurso em outra região.  
+## Explore inference and the catalog
 
+The original lab enabled a preview option called **Deploy models to Azure AI model inference service**. This describes the old portal and should not be assumed to exist in another version.
 
-## **2. Configurar a Implantação do Serviço de Inferência**  
+Open **Model catalog**, inspect each candidate's model card, and compare supported tasks, licensing, deployment options, benchmarks, and price. Use **Compare models** where the interface provides it.
 
-O **Azure AI Inference Service** permite implantar modelos em um endpoint comum, facilitando a comparação entre diferentes modelos.  
+Review quality, accuracy, coherence, fluency, and relevance, but also measure latency and cost for your own workload.
 
-1. No portal do Azure AI Foundry, vá para **Preview features (📣)** e ative **Deploy models to Azure AI model inference service**.  
-2. Feche o painel de recursos de visualização.  
+## Deploy the candidates
 
+The original workflow offered deployment through the catalog or **Models + endpoints**. It used names such as `gpt-4o` and `phi-3.5-mini-instruct`, Global Standard where supported, an automatic version update policy, and the DefaultV2 filter.
 
-## **3. Analisar Detalhes e Benchmarks dos Modelos**  
+The historical example requested 50K tokens per minute for GPT-4o. That is an example quota allocation, not a requirement or an entitlement. Use settings supported by the model and subscription, and understand version-update behavior before choosing it.
 
-Para escolher o melhor modelo, você pode comparar métricas de desempenho.  
+## Compare answers in the playground
 
-1. No painel esquerdo, selecione **Model catalog**.  
-2. Pesquise por **GPT-4o** e visualize seus detalhes e benchmarks.  
-3. Retorne ao catálogo e pesquise por **Phi-3.5-mini-instruct**, analisando suas métricas.  
+Configure a problem-solving assistant with this illustrative system instruction:
 
-### **Comparando Modelos Visualmente**  
-1. No catálogo, selecione **Compare models**.  
-2. Remova os modelos pré-selecionados e adicione **GPT-4o** e **Phi-3.5-mini-instruct**.  
-3. Compare-os em métricas como:  
-   - **Índice de Qualidade**  
-   - **Custo**  
-   - **Precisão**  
-   - **Coerência**  
-   - **Fluência**  
-   - **Relevância**  
+```text
+You are an AI assistant that helps solve problems.
+```
 
+Try the same questions with each deployment and record the full configuration. First test a river-crossing problem:
 
-## **4. Implantar Modelos**  
+```text
+I have a fox, a chicken, and a bag of grain that I need to take over a river in a boat. I can only take one thing at a time. If I leave the chicken and the grain unattended, the chicken will eat the grain. If I leave the fox and the chicken unattended, the fox will eat the chicken. How can I get all three things across the river without anything being eaten?
+```
 
-Você pode implantar modelos de duas formas:  
+Ask for a concise explanation and verify that every crossing respects the constraints. A convincing explanation can still contain an invalid step.
 
-### **Opção 1: Implantar pelo Catálogo de Modelos**  
-1. No **Model catalog**, selecione **GPT-4o** e clique em **Deploy**.  
-2. Personalize as configurações:  
-   - **Nome da implantação**: `gpt-4o`  
-   - **Tipo de implantação**: Global Standard  
-   - **Atualização automática de versão**: Habilitada  
-   - **Recurso de IA conectado**: Selecione seu recurso OpenAI  
-   - **Limite de tokens por minuto (TPM)**: 50K  
-   - **Filtro de conteúdo**: DefaultV2  
-3. Aguarde a conclusão da implantação.  
+## Additional challenge
 
-### **Opção 2: Implantar por Models + Endpoints**  
-1. No painel esquerdo, vá para **Models + endpoints**.  
-2. Selecione **+ Deploy model → Deploy base model** e procure **Phi-3.5-mini-instruct**.  
-3. Aceite a licença e configure:  
-   - **Nome da implantação**: `phi-3.5-mini-instruct`  
-   - **Tipo de implantação**: Global Standard  
-4. Aguarde a implantação ser concluída.  
+```text
+I have 53 socks in my drawer: 21 identical blue, 15 identical black, and 17 identical red. The lights are out, and it is completely dark. How many socks must I take out to make 100 percent certain I have at least one pair of black socks?
+```
 
+The answer is **40 socks**: the worst case is drawing all 38 non-black socks before two black socks. Compare correctness as well as response length and cost.
 
-## **5. Testar os Modelos no Playground de Chat**  
+## Cleanup and outcome
 
-Agora, vamos comparar o desempenho dos modelos em um cenário de resolução de problemas.  
+The exercise demonstrates selection, deployment, and comparison rather than a production model recommendation. Remove deployments and resources created only for the lab when finished. Inspect a resource group before deleting it so shared resources are preserved.
 
-### **Configurando o Chat**  
-1. No painel esquerdo, selecione **Playgrounds → Chat playground**.  
-2. No painel **Setup**, defina a instrução do sistema:  
-   - **"You are an AI assistant that helps solve problems."**  
-3. Aplique as alterações.  
+## Original learning references
 
-### **Testando o GPT-4o**  
-1. Selecione o modelo **GPT-4o**.  
-2. Envie a seguinte pergunta:  
-   ```  
-   I have a fox, a chicken, and a bag of grain that I need to take over a river in a boat. I can only take one thing at a time. If I leave the chicken and the grain unattended, the chicken will eat the grain. If I leave the fox and the chicken unattended, the fox will eat the chicken. How can I get all three things across the river without anything being eaten?  
-   ```  
-3. Peça para explicar o raciocínio:  
-   ```  
-   Explain your reasoning.  
-   ```  
-
-### **Testando o Phi-3.5-mini-instruct**  
-1. Selecione o modelo **Phi-3.5-mini-instruct**.  
-2. Repita os mesmos prompts e compare as respostas.  
-
-### **Desafio Adicional**  
-Teste ambos os modelos com este problema (a resposta correta é **40!**):  
-```  
-I have 53 socks in my drawer: 21 identical blue, 15 identical black, and 17 identical red. The lights are out, and it is completely dark. How many socks must I take out to make 100 percent certain I have at least one pair of black socks?  
-```  
-
----
-
-## **Conclusão**  
-
-Ao comparar modelos, é essencial equilibrar **desempenho** e **custo**. O **catálogo de modelos do Azure AI Foundry** e o **playground de chat** ajudam a tomar decisões informadas antes de implantar uma solução de IA generativa.  
-
-### **Limpeza dos Recursos**  
-Para evitar custos desnecessários:  
-1. Acesse o **portal do Azure**.  
-2. Vá para o **grupo de recursos** usado no exercício.  
-3. Selecione **Delete resource group** e confirme a exclusão.  
-
-Com este guia, você está pronto para explorar e implantar modelos de IA generativa no **Azure AI Foundry**! 🚀
-
-## **Referência**
-- [Choose and deploy a language model](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/02-Explore-model-catalog.html)
+- [Ai.azure.com](https://ai.azure.com)
+- [02 explore model catalog](https://microsoftlearning.github.io/mslearn-ai-studio/Instructions/02-Explore-model-catalog.html)
