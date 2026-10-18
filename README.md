@@ -10,7 +10,7 @@ This repository contains study guides and one standalone Python example that sen
 - [Exercise guides](docs/exercise/): walkthroughs, code excerpts, and screenshots.
 - [Python example](exercises/01-history-assistant.py): an interactive history assistant using Azure OpenAI.
 
-The guides and screenshots reflect the 2025 learning material. Most guides and the example's prompts are currently in Portuguese. Portal instructions and SDK excerpts have not been verified against current Azure services.
+The guides and screenshots reflect the 2025 learning material. Most guides and the example's system prompt are currently in Portuguese. Portal instructions and SDK excerpts have not been verified against current Azure services.
 
 ## Module notes
 
@@ -80,16 +80,26 @@ With the virtual environment active, run:
 python exercises/01-history-assistant.py
 ```
 
-Enter a history question when prompted. The script sends one request and prints the answer. Its terminal messages and system prompt are currently in Portuguese.
+Enter a history question when prompted. The script sends one request and prints the answer. Terminal messages are in English; the system prompt remains in Portuguese to preserve the original assistant behavior. Empty questions are rejected before creating the client.
 
 ### Troubleshooting
 
 - **Missing module:** activate the virtual environment and install `requirements.txt` with that environment's Python interpreter.
 - **Missing credentials or authentication failure:** check both variables and replace the placeholders. Also check existing shell environment variables.
 - **Deployment or API error:** verify the resource endpoint, the deployment named `gpt-4o`, and support for the script's hardcoded API version and parameters.
-- **Quota or connection error:** check Azure quota and network access. The script currently reports failures through SDK exceptions rather than application-specific messages.
+- **Quota or connection error:** check Azure quota and network access. The script reports connection, timeout, and HTTP errors without printing credentials or raw API response bodies.
 
-The repository currently has no automated test suite or CI workflow. Running the example is a live integration operation that requires credentials and may incur charges.
+Missing or blank required environment variables are reported before prompting for input. The program exits with status `0` on success, `1` for handled configuration, input, response, or API errors, and `130` when input is cancelled. No CI workflow is configured yet.
+
+### Run offline tests
+
+With dependencies installed in the active virtual environment, run:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+The tests simulate the Azure client and do not load local credentials or make Azure requests. They cover configuration validation, successful output, request parameters, empty input and output, cancellation, and sanitized API errors. Running the example itself is a live integration operation that requires credentials and may incur charges.
 
 ## Resource cleanup
 
